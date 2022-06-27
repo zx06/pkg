@@ -27,7 +27,7 @@ func TestRetry(t *testing.T) {
 			return fmt.Errorf("error-%d", i)
 		}
 		return nil
-	}, 1)
+	}, 2)
 	if assert.Error(t, err) {
 		assert.Equal(t, "error-2", err.Error())
 		assert.Equal(t, 2, i)
@@ -45,4 +45,20 @@ func TestRetry(t *testing.T) {
 		assert.Equal(t, 3, i)
 	}
 
+}
+
+func ExampleRetry() {
+	i := 0
+	err := Retry(func() error {
+		i++
+		if i < 3 {
+			return fmt.Errorf("error-%d", i)
+		}
+		return nil
+	}, 2)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	// Output:
+	// error-2
 }
