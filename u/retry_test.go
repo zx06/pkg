@@ -3,23 +3,46 @@ package u
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRetry(t *testing.T) {
-	var err error
-	var i int
-	var f func() error
+	err := Retry(func() error {
+		return fmt.Errorf("error")
+	}, 3)
+	if assert.Error(t, err) {
+		assert.Equal(t, "error", err.Error())
+	}
 
-	f = func() error {
+	err = Retry(func() error {
+		return nil
+	}, 3)
+	assert.NoError(t, err)
+
+	i := 0
+	err = Retry(func() error {
 		i++
 		if i < 3 {
-			return fmt.Errorf("error %d", i)
+			return fmt.Errorf("error-%d", i)
 		}
 		return nil
+	}, 1)
+	if assert.Error(t, err) {
+		assert.Equal(t, "error-2", err.Error())
+		assert.Equal(t, 2, i)
 	}
 
-	err = Retry(f, 3)
-	if err != nil {
-		t.Errorf("Retry returned error: %v", err)
+	i = 0
+	err = Retry(func() error {
+		i++
+		if i < 3 {
+			return fmt.Errorf("error-%d", i)
+		}
+		return nil
+	}, 3)
+	if assert.NoError(t, err) {
+		assert.Equal(t, 3, i)
 	}
+
 }
