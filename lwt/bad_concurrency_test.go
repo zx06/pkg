@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestBadLoopDataRace(t *testing.T) {
-	r := BadLoopDataRace()
-	assert.NotEqual(t, []int{0, 1, 2, 3, 4}, r)
-}
+// func TestBadLoopDataRace(t *testing.T) {
+// 	r := BadLoopDataRace()
+// 	assert.NotEqual(t, []int{0, 1, 2, 3, 4}, r)
+// }
 
 func TestBadLoopDataRaceFix1(t *testing.T) {
 	r := BadLoopDataRaceFix1()
