@@ -37,12 +37,11 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
-      
-      - name: Change Dir
-        run: cd lwt
 
       - name: Build
+        working-directory: ./lwt
         run: go build -v ./...
 
       - name: Test
+        working-directory: ./lwt
         run: go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
