@@ -36,12 +36,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18
+          go-version: 1.19
 
       - name: Build
-        working-directory: ./lwt
         run: go build -v ./...
 
       - name: Test
-        working-directory: ./lwt
         run: go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
