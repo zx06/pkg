@@ -121,6 +121,8 @@ func (l *localCloser) SendClose(key, reason string) {
 	c, ok := l.data[key]
 	if ok {
 		c <- reason
+		// 由于使用的是无缓冲channel,上面的操作是阻塞的,可以在消息被消费后删除该channel
+		delete(l.data, key)
 	}
 
 }
