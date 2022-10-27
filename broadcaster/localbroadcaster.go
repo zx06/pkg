@@ -5,19 +5,16 @@ import (
 	"sync"
 )
 
-var LocalBroadcaster *localBroadcaster
-
-func init() {
-	LocalBroadcaster = &localBroadcaster{
-		rooms: make(map[string]*ChanRoom),
-	}
+var LocalBroadcaster Broadcaster = &localBroadcaster{
+	rooms: make(map[string]*ChanRoom),
 }
 
 type ChanRoom struct {
-	users     map[RoomDataChan]struct{}
-	dataChan  chan []byte
-	joinChan  chan RoomDataChan
-	leaveChan chan RoomDataChan
+	users         map[RoomDataChan]struct{}
+	dataChan      chan []byte
+	joinChan      chan RoomDataChan
+	leaveChan     chan RoomDataChan
+	closeRoomChan chan []byte
 }
 type localBroadcaster struct {
 	sync.Mutex
@@ -52,12 +49,13 @@ func (b *localBroadcaster) GetRoomByID(id string) (*ChanRoom, bool) {
 	return room, ok
 }
 
-func NewRoom(buflen int) *ChanRoom {
+func NewRoom(bufLen int) *ChanRoom {
 	r := &ChanRoom{
-		users:     make(map[RoomDataChan]struct{}),
-		dataChan:  make(chan []byte, buflen),
-		joinChan:  make(chan RoomDataChan),
-		leaveChan: make(chan RoomDataChan),
+		users:         make(map[RoomDataChan]struct{}),
+		dataChan:      make(chan []byte, bufLen),
+		closeRoomChan: make(chan []byte),
+		joinChan:      make(chan RoomDataChan),
+		leaveChan:     make(chan RoomDataChan),
 	}
 	go r.run()
 	return r
@@ -106,4 +104,31 @@ func (r *ChanRoom) Close() error {
 	close(r.joinChan)
 	close(r.leaveChan)
 	return nil
+}
+
+var LocalCloser Closer = &localCloser{
+	data: make(map[string]chan string),
+}
+
+type localCloser struct {
+	sync.Mutex
+	data map[string]chan string
+}
+
+func (l *localCloser) SendClose(key, reason string) {
+	l.Lock()
+	l.Unlock()
+	c, ok := l.data[key]
+	if ok {
+		c <- reason
+	}
+
+}
+
+func (l *localCloser) SubClose(key string) chan string {
+	l.Lock()
+	l.Unlock()
+	c := make(chan string)
+	l.data[key] = c
+	return c
 }
