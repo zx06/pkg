@@ -117,7 +117,7 @@ type localCloser struct {
 
 func (l *localCloser) SendClose(key, reason string) {
 	l.Lock()
-	l.Unlock()
+	defer l.Unlock()
 	c, ok := l.data[key]
 	if ok {
 		c <- reason
@@ -129,7 +129,7 @@ func (l *localCloser) SendClose(key, reason string) {
 
 func (l *localCloser) SubClose(key string) chan string {
 	l.Lock()
-	l.Unlock()
+	defer l.Unlock()
 	c := make(chan string)
 	l.data[key] = c
 	return c
